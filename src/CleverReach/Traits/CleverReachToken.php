@@ -2,14 +2,18 @@
 
 namespace UltraboldMA\CleverReach\Traits;
 
-use App\Models\CleverReachClient;
-use App\Actions\CleverReach\RequestToken;
+use UltraboldMA\CleverReach\Actions\CleverReach\RequestToken;
+use UltraboldMA\CleverReach\Models\CleverReachClient;
 
 trait CleverReachToken
 {
     public function tokenValid(CleverReachClient $cleverReachClient): void
     {
-        if ($cleverReachClient->token_expiration < now()) {
+        $expiresAt = $cleverReachClient->token_expiration
+            ? now()->parse($cleverReachClient->token_expiration)
+            : null;
+
+        if (! $cleverReachClient->token || ! $expiresAt || $expiresAt->isPast()) {
             $this->requestToken($cleverReachClient);
         }
     }

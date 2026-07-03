@@ -1,30 +1,39 @@
 <?php
 
-namespace App\Http\Livewire\CleverReach;
+namespace UltraboldMA\CleverReach\Livewire;
 
 use Exception;
-use Livewire\Component;
 use Illuminate\Support\Arr;
-use App\Models\CleverReachGroup;
-use App\Models\CleverReachNewsletter;
-use App\Actions\CleverReach\GetSubscribers;
-use App\Actions\CleverReach\DeleteSubscriber;
+use Livewire\Component;
+use UltraboldMA\CleverReach\Actions\CleverReach\DeleteSubscriber;
+use UltraboldMA\CleverReach\Actions\CleverReach\GetSubscribers;
+use UltraboldMA\CleverReach\Models\CleverReachGroup;
+use UltraboldMA\CleverReach\Models\CleverReachNewsletter;
 
 class CleverReachSubscribers extends Component
 {
+    public $selectedNewsletter;
 
-    public $selectedNewsletter, $selectedGroup;
-    public $availableNewsletters, $availableGroups;
+    public $selectedGroup;
+
+    public $availableNewsletters;
+
+    public $availableGroups;
+
     public $subscribers = [];
+
     public $currentSubscriber;
+
     public $page = 0;
+
     public $pageSize = 25;
+
     public $showConfirm = false;
 
     protected $queryString = [
         'selectedNewsletter' => ['except' => ''],
         'selectedGroup' => ['except' => ''],
-        'page' => ['except' => 0]
+        'page' => ['except' => 0],
     ];
 
     public function mount()
@@ -38,26 +47,23 @@ class CleverReachSubscribers extends Component
 
     public function render()
     {
-        return view('livewire.clever-reach.clever-reach-subscribers');
+        return view('clever-reach::livewire.clever-reach-subscribers');
     }
 
     public function loadSubscribers()
     {
-        if ($this->selectedNewsletter) {
-            $selectedNewsletter = $this->availableNewsletters->where('key', $this->selectedNewsletter)->first();
-            $client = $selectedNewsletter->clever_reach_client;
-            $groupId = $selectedNewsletter->clever_reach_group->external_id;
-        }
-        if ($this->selectedGroup) {
-            $group = $this->availableGroups->where('external_id', $this->selectedGroup)->first();
-            $client = $group->clever_reach_client;
-            $groupId = $this->selectedGroup;
+        [$client, $groupId] = $this->selectedClientAndGroup();
+
+        if (! $client || ! $groupId) {
+            $this->reset('subscribers');
+
+            return;
         }
 
-        $subscriberRequest = new GetSubscribers();
+        $subscriberRequest = new GetSubscribers;
         $this->subscribers = $subscriberRequest->handle($client, $groupId, [
             'page' => $this->page,
-            'pagesize' => $this->pageSize
+            'pagesize' => $this->pageSize,
         ]);
     }
 
@@ -79,7 +85,7 @@ class CleverReachSubscribers extends Component
 
     public function previousPage()
     {
-        $this->page--;
+        $this->page = max(0, $this->page - 1);
         $this->loadSubscribers();
     }
 
@@ -101,28 +107,24 @@ class CleverReachSubscribers extends Component
 
     public function deleteSubscriber()
     {
-        //Get client
-        if ($this->selectedNewsletter) {
-            $selectedNewsletter = $this->availableNewsletters->where('key', $this->selectedNewsletter)->first();
-            $client = $selectedNewsletter->clever_reach_client;
+        [$client] = $this->selectedClientAndGroup();
+
+        if (! $client) {
+            $this->reset('showConfirm', 'currentSubscriber');
+
+            return;
         }
-        if ($this->selectedGroup) {
-            $group = $this->availableGroups->where('external_id', $this->selectedGroup)->first();
-            $client = $group->clever_reach_client;
-        }
-        //Delete subscriber
+
         try {
             $deleteRequest = new DeleteSubscriber;
             $deleteRequest->handle($client, Arr::get($this->currentSubscriber, 'id'));
-            //Refresh list
+
             $this->loadSubscribers();
-            //Reset
             $this->reset('showConfirm', 'currentSubscriber');
-            //success message
+
             session()->flash('message', __('Subscriber deleted successfully'));
         } catch (Exception $ex) {
             session()->flash('error', $ex->getMessage());
-            //Reset
             $this->reset('showConfirm', 'currentSubscriber');
         }
     }
@@ -130,5 +132,28 @@ class CleverReachSubscribers extends Component
     public function cancel()
     {
         $this->reset('showConfirm', 'currentSubscriber');
+    }
+
+    private function selectedClientAndGroup(): array
+    {
+        if ($this->selectedNewsletter) {
+            $newsletter = $this->availableNewsletters->where('key', $this->selectedNewsletter)->first();
+
+            return [
+                $newsletter?->clever_reach_client,
+                $newsletter?->clever_reach_group?->external_id,
+            ];
+        }
+
+        if ($this->selectedGroup) {
+            $group = $this->availableGroups->where('external_id', $this->selectedGroup)->first();
+
+            return [
+                $group?->clever_reach_client,
+                $this->selectedGroup,
+            ];
+        }
+
+        return [null, null];
     }
 }

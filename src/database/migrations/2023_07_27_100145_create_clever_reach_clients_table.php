@@ -14,10 +14,10 @@ return new class extends Migration
         Schema::create('clever_reach_clients', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('client_id');
+            $table->string('client_id')->unique();
             $table->string('client_secret');
             $table->string('token', 500)->nullable();
-            $table->string('token_expiration')->nullable();
+            $table->timestamp('token_expiration')->nullable();
             $table->timestamps();
         });
     }

@@ -15,9 +15,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('clever_reach_client_id')->constrained()->cascadeOnDelete();
             $table->string('name');
-            $table->string('key');
-            $table->integer('form_id')->nullable();
-            $table->integer('group_id');
+            $table->string('key')->unique();
+            $table->foreignId('form_id')->nullable()->constrained('clever_reach_forms')->nullOnDelete();
+            $table->foreignId('group_id')->constrained('clever_reach_groups')->cascadeOnDelete();
             $table->string('language')->default('de');
             $table->boolean('double_opt_in')->default(true);
             $table->json('cl_attributes')->nullable();

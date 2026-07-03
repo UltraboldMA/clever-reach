@@ -4,12 +4,13 @@
 
 **Integration for the v3 API**
 
-This package is a boiler plate for using the CleverReach API v3.
-It contains Actions and Livewire components to handle Groups, Forms and
-Subscribers. You can generate newsletter lists complete with form/group ID
-for generating easy signup forms.
+This package integrates the CleverReach API v3 with Laravel and Livewire.
+It contains vendor-namespaced Actions, Models, routes and Livewire components
+for handling clients, groups, forms, newsletters and subscribers.
 
-**Only Laravel 9/10 are currently supported**
+**Laravel 10, 11, 12 and 13 are currently supported.**
+
+Laravel 9 / Livewire 2 support was dropped for the modern Livewire 3/4 stack.
 
 ### Docs
 
@@ -26,26 +27,33 @@ Add the package in your composer.json by executing the command.
 composer require ultraboldma/clever-reach
 ```
 
-Laravel CleverReach features auto discover for Laravel. In case this fails, just add the
-Service Provider to the app.php file.
+Laravel CleverReach features auto discover for Laravel. In case this fails, add the
+Service Provider to `config/app.php` on Laravel 10 or `bootstrap/providers.php` on Laravel 11+.
 
 ```
 UltraboldMA\CleverReach\CleverReachServiceProvider::class,
 ```
 
-### Publishing everyting
+### Publish package files
 
-Since we're focused on providing a working boiler plate, all necessary files will be
-published to your application structure. You can also publish individual parts if needed.
+Routes, views and Livewire components are loaded from the package. Publish only what you
+want to customize.
 
 ```bash
 php artisan clever-reach:publish
 ```
 
+Individual tags are also available.
+
+```bash
+php artisan vendor:publish --tag=clever-reach-config
+php artisan vendor:publish --tag=clever-reach-migrations
+php artisan vendor:publish --tag=clever-reach-views
+```
+
 ### Migrations
 
-During the publishing process the migrations were also published.
-This will generate all tables you need.
+Publish and run the migrations.
 
 ```bash
 php artisan migrate
@@ -53,8 +61,15 @@ php artisan migrate
 
 ### Menu items
 
-There is no menu included with this package. You will need to build your own and
-link to the routes that were published.
+There is no menu included with this package. Build your own and link to the package routes.
+
+```php
+route('clever-reach')
+route('clever-reach-groups')
+route('clever-reach-forms')
+route('clever-reach-newsletters')
+route('clever-reach-subscribers')
+```
 
 ### Tailwind
 
@@ -78,6 +93,15 @@ with multiple CleverReach accounts.
 
 ```php
 'singleClient' => true
+```
+
+### Routes
+
+The package registers its routes automatically. Configure prefix and middleware if needed.
+
+```php
+'route_prefix' => 'admin',
+'route_middleware' => ['web', 'auth'],
 ```
 
 ### Available languages
@@ -109,9 +133,11 @@ Same as the default group ID. (not yet available)
 
 ## Laravel compatibility
 
-| Laravel | LaravelCM |
-| :------ | :-------- |
-| 10.x    | >0.0.\*   |
-| 9.x     | >0.0.\*   |
+| Laravel | Livewire | PHP |
+| :------ | :------- | :-- |
+| 13.x    | 4.x      | 8.3+ |
+| 12.x    | 3.x / 4.x | 8.2+ |
+| 11.x    | 3.x / 4.x | 8.2+ |
+| 10.x    | 3.x / 4.x | 8.1+ |
 
 Lower versions of Laravel are not supported.

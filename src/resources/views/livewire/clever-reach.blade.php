@@ -62,7 +62,7 @@
                         <label for="client.name" class="block text-sm font-medium text-gray-700">
                             {{ __('Name') }}
                         </label>
-                        <input wire:model.defer="client.name" autofocus type="text" id="client.name"
+                        <input wire:model="client.name" autofocus type="text" id="client.name"
                             class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" />
                         @error('client.name')
                             <p class="text-sm text-red-600">{{ $message }}</p>
@@ -72,7 +72,7 @@
                         <label for="client.client_id" class="block text-sm font-medium text-gray-700">
                             {{ __('Client ID') }}
                         </label>
-                        <input wire:model.defer="client.client_id" type="text" id="client.client_id"
+                        <input wire:model="client.client_id" type="text" id="client.client_id"
                             class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" />
                         @error('client.client_id')
                             <p class="text-sm text-red-600">{{ $message }}</p>
@@ -82,7 +82,7 @@
                         <label for="client.client_secret" class="block text-sm font-medium text-gray-700">
                             {{ __('Secret') }}
                         </label>
-                        <input wire:model.defer="client.client_secret" type="text" id="client.client_secret"
+                        <input wire:model="client.client_secret" type="password" id="client.client_secret" autocomplete="off"
                             class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" />
                         @error('client.client_secret')
                             <p class="text-sm text-red-600">{{ $message }}</p>

@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Actions\CleverReach;
+namespace UltraboldMA\CleverReach\Actions\CleverReach;
 
-use App\Models\CleverReachClient;
 use Illuminate\Support\Facades\Http;
+use UltraboldMA\CleverReach\Models\CleverReachClient;
 use UltraboldMA\CleverReach\Traits\CleverReachToken;
 
 class ShowSubscriber
@@ -14,10 +14,12 @@ class ShowSubscriber
     {
         $this->tokenValid($cleverReachClient);
 
-        $url = config('clever-reach.baseUrl') . '/receivers.json/' . $subscriberId;
+        $url = config('clever-reach.baseUrl').'/receivers.json/'.$subscriberId;
 
-        return  Http::acceptJson()
+        return Http::acceptJson()
             ->withToken($cleverReachClient->token)
-            ->get($url)->json();
+            ->get($url)
+            ->throw()
+            ->json();
     }
 }
