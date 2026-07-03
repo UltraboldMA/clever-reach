@@ -1,50 +1,52 @@
 <?php
 
-namespace App\Http\Livewire\CleverReach;
+namespace UltraboldMA\CleverReach\Livewire;
 
 use Livewire\Component;
-use App\Models\CleverReachClient;
-use App\Actions\CleverReach\GetForms;
-use App\Models\CleverReachForm;
+use UltraboldMA\CleverReach\Actions\CleverReach\GetForms;
+use UltraboldMA\CleverReach\Models\CleverReachClient;
+use UltraboldMA\CleverReach\Models\CleverReachForm;
 
 class CleverReachForms extends Component
 {
     public $forms = [];
+
     public $selectedClient;
+
     public $clients;
 
     protected $queryString = [
-        'selectedClient' => ['except' => '']
+        'selectedClient' => ['except' => ''],
     ];
 
     public function mount()
     {
-        if ($this->selectedClient) {
-            $this->loadForms();
-        }
         if (config('clever-reach.singleClient')) {
-            $this->selectedClient = CleverReachClient::first()?->id;
+            $this->selectedClient = $this->selectedClient ?: CleverReachClient::first()?->id;
         } else {
             $this->clients = CleverReachClient::all();
+        }
+
+        if ($this->selectedClient) {
+            $this->loadForms();
         }
     }
 
     public function render()
     {
-        $this->forms = CleverReachForm::all();
-        return view('livewire.clever-reach-forms');
+        return view('clever-reach::livewire.clever-reach-forms');
     }
 
-    public function refreshForms(GetForms $getForms)
+    public function refreshForms()
     {
-        //dd(is_numeric($this->selectedClient));
-        if (!is_numeric($this->selectedClient)) {
+        if (! is_numeric($this->selectedClient)) {
             $this->reset('forms');
+
             return;
         }
 
-        $client = CleverReachClient::find($this->selectedClient);
-        $this->forms = $getForms->handle($client);
+        $client = CleverReachClient::findOrFail($this->selectedClient);
+        $this->forms = app(GetForms::class)->handle($client);
     }
 
     public function loadForms()

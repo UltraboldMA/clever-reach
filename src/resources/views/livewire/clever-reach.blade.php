@@ -36,12 +36,19 @@
                                 <td>{{ $client->clever_reach_newsletters_count }}</td>
                                 <td>{{ $client->tokenValid }}</td>
                                 <td class="text-right">
-                                    <x-button-success type="button" wire:click="refreshToken({{ $client->id }})">
-                                        <div wire:loading.remove>Token</div>
-                                        <div wire:loading>Loading</div>
-                                    </x-button-success>
-                                    <x-jet-button type="button" wire:click="editClient({{ $client->id }})">Edit</x-jet-button>
-                                    <x-jet-danger-button type="button" wire:click="deleteConfirmClient({{ $client->id }})">Delete</x-jet-danger-button>
+                                    <button type="button" wire:click="refreshToken({{ $client->id }})"
+                                        class="inline-flex items-center px-4 py-2 text-xs font-semibold tracking-widest text-white uppercase transition bg-green-800 border border-transparent rounded-md hover:bg-green-700 active:bg-green-900 focus:outline-none focus:border-green-900 focus:ring focus:ring-green-300 disabled:opacity-25">
+                                        <div wire:loading.delay.remove>Token</div>
+                                        <div wire:loading.delay>Loading</div>
+                                    </button>
+                                    <button wire:click="editClient({{ $client->id }})" type="button"
+                                        class="items-center px-4 py-2 text-xs font-semibold tracking-widest text-white uppercase transition bg-gray-800 border border-transparent rounded-md hover:bg-gray-700 active:bg-gray-900 focus:outline-none focus:border-gray-900 focus:ring focus:ring-gray-300 disabled:opacity-25">
+                                        {{ __('Edit') }}
+                                    </button>
+                                    <button wire:click="deleteConfirmClient({{ $client->id }})" type="button"
+                                        class="inline-flex items-center justify-center px-4 py-2 text-xs font-semibold tracking-widest text-white uppercase transition bg-red-600 border border-transparent rounded-md hover:bg-red-500 focus:outline-none focus:border-red-700 focus:ring focus:ring-red-200 active:bg-red-600 disabled:opacity-25">
+                                        {{ __('Delete') }}
+                                    </button>
                                 </td>
                             </tr>
                         @endforeach
@@ -52,51 +59,69 @@
             @if ($showForm)
                 <div class="grid grid-cols-12 gap-4 py-5">
                     <div class="col-span-12 py-2 sm:col-span-6">
-                        <x-jet-label for="client.name" value="{{ __('Name') }}" />
-                        <x-jet-input id="client.name" type="text" class="block w-full mt-1" wire:model.defer="client.name" autofocus />
-                        <x-jet-input-error for="client.name" class="mt-2" />
+                        <label for="client.name" class="block text-sm font-medium text-gray-700">
+                            {{ __('Name') }}
+                        </label>
+                        <input wire:model="client.name" autofocus type="text" id="client.name"
+                            class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" />
+                        @error('client.name')
+                            <p class="text-sm text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
                     <div class="col-span-12 py-2 sm:col-span-6">
-                        <x-jet-label for="client.client_id" value="{{ __('Client ID') }}" />
-                        <x-jet-input id="client.client_id" type="text" class="block w-full mt-1" wire:model.defer="client.client_id" />
-                        <x-jet-input-error for="client.client_id" class="mt-2" />
+                        <label for="client.client_id" class="block text-sm font-medium text-gray-700">
+                            {{ __('Client ID') }}
+                        </label>
+                        <input wire:model="client.client_id" type="text" id="client.client_id"
+                            class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" />
+                        @error('client.client_id')
+                            <p class="text-sm text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
                     <div class="col-span-12 py-2">
-                        <x-jet-label for="client.client_secret" value="{{ __('Secret') }}" />
-                        <x-jet-input id="client.client_secret" type="text" class="block w-full mt-1" wire:model.defer="client.client_secret" />
-                        <x-jet-input-error for="client.client_secret" class="mt-2" />
+                        <label for="client.client_secret" class="block text-sm font-medium text-gray-700">
+                            {{ __('Secret') }}
+                        </label>
+                        <input wire:model="client.client_secret" type="password" id="client.client_secret" autocomplete="off"
+                            class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" />
+                        @error('client.client_secret')
+                            <p class="text-sm text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
                     <div class="col-span-6 col-start-1 text-left">
-                        <x-jet-danger-button wire:click="cancel">Cancel</x-jet-danger-button>
+                        <button wire:click="cancel" type="button"
+                            class="inline-flex items-center justify-center px-4 py-2 text-xs font-semibold tracking-widest text-white uppercase transition bg-red-600 border border-transparent rounded-md hover:bg-red-500 focus:outline-none focus:border-red-700 focus:ring focus:ring-red-200 active:bg-red-600 disabled:opacity-25">
+                            {{ __('Cancel') }}
+                        </button>
                     </div>
                     <div class="col-span-6 text-right">
-                        <x-jet-button wire:click="saveClient">Save</x-jet-button>
+                        <button wire:click="saveClient" type="button"
+                            class="items-center px-4 py-2 text-xs font-semibold tracking-widest text-white uppercase transition bg-gray-800 border border-transparent rounded-md hover:bg-gray-700 active:bg-gray-900 focus:outline-none focus:border-gray-900 focus:ring focus:ring-gray-300 disabled:opacity-25">
+                            {{ __('Save') }}
+                        </button>
                     </div>
                 </div>
             @endif
         </div>
     </div>
-    <x-jet-dialog-modal wire:model="showConfirm">
-        <x-slot name="title">
-            {{ __('Delete Client: ') }} {{ $client->name }}
-        </x-slot>
-
-        <x-slot name="content">
-            <div>
-                {{ __('Are you sure you want to delete this client.') }}
+    @if ($showConfirm)
+        <div class="absolute top-0 flex w-screen min-h-screen py-10 antialiased font-medium text-gray-800 bg-opacity-90 bg-slate-200">
+            <div class="max-w-lg mx-2 p-2 sm:m-auto bg-white border-[1px] border-gray-200 shadow rounded-xl hover:shadow-lg">
+                <div class="relative p-6">
+                    <a href="#" wire:click="cancel" class="absolute top-1.5 right-1.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 cursor-pointer fill-current text-slate-500 hover:text-slate-900">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </a>
+                    <h1 class="text-3xl font-bold">{{ __('Delete Client: ') }} {{ $client->name }}</h1>
+                    <p class="text-sm text-gray-500">{{ __('Are you sure you want to delete this client.') }}</p>
+                    <div class="flex flex-row mt-6 space-x-2 justify-evenly">
+                        <a href="#" wire:click="cancel" class="w-full py-3 text-sm text-center text-gray-500 transition duration-150 ease-linear bg-white border border-gray-200 rounded-lg hover:bg-gray-100">{{ __('Cancel') }}</a>
+                        <a href="#" wire:click="deleteClient"
+                            class="w-full py-3 text-sm font-medium text-center text-white transition duration-150 ease-linear bg-red-600 border border-red-600 rounded-lg hover:bg-red-500">{{ __('Delete') }}</a>
+                    </div>
+                </div>
             </div>
-        </x-slot>
-
-        <x-slot name="footer">
-            <div class="flex justify-between w-full">
-                <x-jet-danger-button wire:click="cancel">
-                    {{ __('Cancel') }}
-                </x-jet-danger-button>
-                <x-jet-button wire:click="deleteClient">
-                    {{ __('Delete') }}
-                </x-jet-button>
-            </div>
-
-        </x-slot>
-    </x-jet-dialog-modal>
+        </div>
+    @endif
 </div>

@@ -1,24 +1,29 @@
 <?php
 
-namespace App\Http\Livewire\CleverReach;
+namespace UltraboldMA\CleverReach\Livewire;
 
-use App\Models\CleverReachClient;
+use Illuminate\Support\Str;
 use Livewire\Component;
-use App\Models\CleverReachForm;
-use App\Models\CleverReachGroup;
-use App\Models\CleverReachNewsletter;
+use UltraboldMA\CleverReach\Models\CleverReachClient;
+use UltraboldMA\CleverReach\Models\CleverReachForm;
+use UltraboldMA\CleverReach\Models\CleverReachGroup;
+use UltraboldMA\CleverReach\Models\CleverReachNewsletter;
 
 class CleverReachNewsletters extends Component
 {
     public $editId;
+
     public $showForm = false;
+
     public CleverReachNewsletter $cleverReachNewsletter;
-    public $attributes = [];
+
+    public $clAttributes = [];
+
     public $globalAttributes = [];
 
     protected $queryString = [
         'editId' => ['except' => ''],
-        'showForm' => ['except' => false]
+        'showForm' => ['except' => false],
     ];
 
     protected $rules = [
@@ -35,18 +40,22 @@ class CleverReachNewsletters extends Component
     {
         if ($this->editId) {
             $this->showForm = true;
-            $this->cleverReachNewsletter = CleverReachNewsletter::find($this->editId);
-        } elseif ($this->showForm) {
-            $this->cleverReachNewsletter = new CleverReachNewsletter;
-            $this->cleverReachNewsletter->double_opt_in = true;
-            $this->cleverReachNewsletter->key = uniqid();
-            $this->cleverReachNewsletter->clever_reach_client_id = CleverReachClient::first()?->id;
+            $this->cleverReachNewsletter = CleverReachNewsletter::findOrFail($this->editId);
+            $this->fillAttributes();
+
+            return;
+        }
+
+        $this->cleverReachNewsletter = new CleverReachNewsletter;
+
+        if ($this->showForm) {
+            $this->fillDefaults();
         }
     }
 
     public function render()
     {
-        return view('livewire.clever-reach-newsletters')->with([
+        return view('clever-reach::livewire.clever-reach-newsletters')->with([
             'newsletters' => CleverReachNewsletter::all(),
             'groups' => CleverReachGroup::with('clever_reach_client')->get(),
             'forms' => CleverReachForm::with('clever_reach_client')->get(),
@@ -58,9 +67,7 @@ class CleverReachNewsletters extends Component
     {
         $this->showForm = true;
         $this->cleverReachNewsletter = new CleverReachNewsletter;
-        $this->cleverReachNewsletter->double_opt_in = true;
-        $this->cleverReachNewsletter->key = uniqid();
-        $this->cleverReachNewsletter->clever_reach_client_id = CleverReachClient::first()?->id;
+        $this->fillDefaults();
     }
 
     public function edit(CleverReachNewsletter $cleverReachNewsletter)
@@ -68,16 +75,14 @@ class CleverReachNewsletters extends Component
         $this->editId = $cleverReachNewsletter->id;
         $this->showForm = true;
         $this->cleverReachNewsletter = $cleverReachNewsletter;
-        //dd($this->cleverReachNewsletter->toArray());
-        $this->attributes = $cleverReachNewsletter->cl_attributes ?? [];
-        $this->globalAttributes = $cleverReachNewsletter->cl_global_attributes ?? [];
+        $this->fillAttributes();
     }
 
     public function save()
     {
         $this->validate();
 
-        $this->cleverReachNewsletter->cl_attributes = $this->attributes;
+        $this->cleverReachNewsletter->cl_attributes = $this->clAttributes;
         $this->cleverReachNewsletter->cl_global_attributes = $this->globalAttributes;
 
         $this->cleverReachNewsletter->save();
@@ -103,15 +108,30 @@ class CleverReachNewsletters extends Component
     public function deleteGlobalAttribute($attribute_index)
     {
         unset($this->globalAttributes[$attribute_index]);
+        $this->globalAttributes = array_values($this->globalAttributes);
     }
 
     public function addAttribute()
     {
-        $this->attributes[] = '';
+        $this->clAttributes[] = '';
     }
 
     public function deleteAttribute($attribute_index)
     {
-        unset($this->attributes[$attribute_index]);
+        unset($this->clAttributes[$attribute_index]);
+        $this->clAttributes = array_values($this->clAttributes);
+    }
+
+    private function fillDefaults(): void
+    {
+        $this->cleverReachNewsletter->double_opt_in = true;
+        $this->cleverReachNewsletter->key = (string) Str::uuid();
+        $this->cleverReachNewsletter->clever_reach_client_id = CleverReachClient::first()?->id;
+    }
+
+    private function fillAttributes(): void
+    {
+        $this->clAttributes = $this->cleverReachNewsletter->cl_attributes ?? [];
+        $this->globalAttributes = $this->cleverReachNewsletter->cl_global_attributes ?? [];
     }
 }

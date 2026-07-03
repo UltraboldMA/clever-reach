@@ -18,6 +18,8 @@ return new class extends Migration
             $table->string('name');
             $table->unsignedBigInteger('customer_tables_id')->nullable();
             $table->timestamps();
+
+            $table->unique(['clever_reach_client_id', 'external_id']);
         });
     }
 

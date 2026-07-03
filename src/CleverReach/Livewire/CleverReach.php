@@ -1,29 +1,36 @@
 <?php
 
-namespace App\Http\Livewire\CleverReach;
+namespace UltraboldMA\CleverReach\Livewire;
 
-use App\Actions\CleverReach\RequestToken;
-use App\Models\CleverReachClient;
 use Exception;
+use Illuminate\Validation\Rule;
 use Livewire\Component;
+use UltraboldMA\CleverReach\Actions\CleverReach\RequestToken;
+use UltraboldMA\CleverReach\Models\CleverReachClient;
 
 class CleverReach extends Component
 {
     public CleverReachClient $client;
+
     public $showForm = false;
+
     public $showConfirm = false;
+
     public $editId;
 
     protected $queryString = [
         'showForm' => ['except' => false],
-        'editId' => ['except' => '']
+        'editId' => ['except' => ''],
     ];
 
     protected function rules()
     {
         return [
             'client.name' => 'required',
-            'client.client_id' => 'required|unique:clever_reach_clients,client_id,' . $this->client->id,
+            'client.client_id' => [
+                'required',
+                Rule::unique('clever_reach_clients', 'client_id')->ignore($this->client->id),
+            ],
             'client.client_secret' => 'required',
         ];
     }
@@ -32,7 +39,7 @@ class CleverReach extends Component
     {
         if ($this->editId) {
             $this->showForm = true;
-            $this->client = CleverReachClient::find($this->editId);
+            $this->client = CleverReachClient::findOrFail($this->editId);
         } else {
             $this->client = new CleverReachClient;
         }
@@ -40,8 +47,8 @@ class CleverReach extends Component
 
     public function render()
     {
-        return view('livewire.clever-reach')->with([
-            'cleverReachClients' => CleverReachClient::withCount('clever_reach_newsletters')->get()
+        return view('clever-reach::livewire.clever-reach')->with([
+            'cleverReachClients' => CleverReachClient::withCount('clever_reach_newsletters')->get(),
         ]);
     }
 
@@ -103,7 +110,7 @@ class CleverReach extends Component
     public function refreshToken(CleverReachClient $cleverReachClient)
     {
         try {
-            $request = new RequestToken();
+            $request = new RequestToken;
 
             $request->handle($cleverReachClient);
 

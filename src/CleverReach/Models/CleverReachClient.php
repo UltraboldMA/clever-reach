@@ -1,16 +1,27 @@
 <?php
 
-namespace App\Models;
+namespace UltraboldMA\CleverReach\Models;
 
-use Illuminate\Support\Arr;
-use Illuminate\Database\Eloquent\Model;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 
+/**
+ * @property int $id
+ * @property string $name
+ * @property string $client_id
+ * @property string $client_secret
+ * @property string|null $token
+ * @property CarbonInterface|null $token_expiration
+ *
+ * @method static static create(array<string, mixed> $attributes = [])
+ * @method static static findOrFail(mixed $id)
+ * @method static static|null first()
+ * @method static \Illuminate\Database\Eloquent\Builder<static> withCount(string|array<int|string, mixed> $relations)
+ */
 class CleverReachClient extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'name',
         'client_id',
@@ -19,8 +30,12 @@ class CleverReachClient extends Model
         'token_expiration',
     ];
 
+    protected $casts = [
+        'token_expiration' => 'datetime',
+    ];
+
     protected $appends = [
-        'token_valid'
+        'token_valid',
     ];
 
     public function clever_reach_newsletters()
@@ -31,7 +46,9 @@ class CleverReachClient extends Model
     public function tokenValid(): Attribute
     {
         return Attribute::make(
-            get: fn (mixed $value, array $attributes) => Arr::get($attributes, 'token_expiration') ? now()->parse(Arr::get($attributes, 'token_expiration'))->format('d.m.Y H:i') . ' Uhr' : '-'
+            get: fn (mixed $value, array $attributes) => Arr::get($attributes, 'token_expiration')
+                ? now()->parse(Arr::get($attributes, 'token_expiration'))->format('d.m.Y H:i').' Uhr'
+                : '-'
         );
     }
 }

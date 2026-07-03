@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -20,10 +19,12 @@ return new class extends Migration
             $table->boolean('locked');
             $table->boolean('backup');
             $table->string('receiver_info');
-            $table->timestamp('stamp');
+            $table->timestamp('stamp')->nullable();
             $table->timestamp('last_mailing')->nullable();
-            $table->timestamp('last_changed');
+            $table->timestamp('last_changed')->nullable();
             $table->timestamps();
+
+            $table->unique(['clever_reach_client_id', 'external_id']);
         });
     }
 

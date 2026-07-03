@@ -1,30 +1,30 @@
 <?php
 
-namespace App\Actions\CleverReach;
+namespace UltraboldMA\CleverReach\Actions\CleverReach;
 
 use Exception;
 use Illuminate\Support\Arr;
-use App\Traits\CleverReachToken;
-use App\Models\CleverReachClient;
 use Illuminate\Support\Facades\Http;
-use App\Models\CleverReachSubscriber;
+use UltraboldMA\CleverReach\Models\CleverReachClient;
+use UltraboldMA\CleverReach\Traits\CleverReachToken;
 
 class DeleteSubscriber
 {
     use CleverReachToken;
 
-    public function handle(CleverReachClient $cleverReachClient, int $subscriberId): bool
+    public function handle(CleverReachClient $cleverReachClient, mixed $subscriberId): bool
     {
         $this->tokenValid($cleverReachClient);
 
-        $url = config('clever-reach.baseUrl') . '/receivers.json/' . $subscriberId;
+        $url = config('clever-reach.baseUrl').'/receivers.json/'.$subscriberId;
 
         $response = Http::acceptJson()
             ->withToken($cleverReachClient->token)
             ->delete($url);
-        if ($response->status() !== 200) {
-            throw new Exception(Arr::get($response->json(), 'error.message'));
+        if (! $response->successful()) {
+            throw new Exception(Arr::get($response->json(), 'error.message', $response->body()));
         }
-        return $response->json();
+
+        return true;
     }
 }

@@ -3,57 +3,53 @@
 namespace UltraboldMA\CleverReach;
 
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Foundation\AliasLoader;
+use UltraboldMA\CleverReach\Livewire\CleverReach;
+use UltraboldMA\CleverReach\Livewire\CleverReachForms;
+use UltraboldMA\CleverReach\Livewire\CleverReachGroups;
+use UltraboldMA\CleverReach\Livewire\CleverReachNewsletters;
+use UltraboldMA\CleverReach\Livewire\CleverReachSubscribers;
 
 class CleverReachServiceProvider extends ServiceProvider
 {
+    public function boot(): void
+    {
+        $this->loadViewsFrom(__DIR__.'/../resources/views', 'clever-reach');
+        $this->loadRoutesFrom(__DIR__.'/../routes/clever-reach.php');
 
-  public function boot()
-  {
-    //Publish config
-    $this->publishes([
-      __DIR__ . '/../config/clever-reach.php' => config_path('clever-reach.php'),
-    ], 'clever-reach-config');
-    //Publish migrations
-    $this->publishes([
-      __DIR__ . '/../database/migrations/' => database_path('migrations'),
-    ], 'clever-reach-migrations');
+        $this->callAfterResolving('livewire', function ($livewire): void {
+            $livewire->component('clever-reach.clients', CleverReach::class);
+            $livewire->component('clever-reach.groups', CleverReachGroups::class);
+            $livewire->component('clever-reach.forms', CleverReachForms::class);
+            $livewire->component('clever-reach.newsletters', CleverReachNewsletters::class);
+            $livewire->component('clever-reach.subscribers', CleverReachSubscribers::class);
+        });
 
-    //Publishes Models
-    $this->publishes([
-      __DIR__ . '/Models' => app_path('/Models')
-    ], 'clever-reach-models');
+        if ($this->app->runningInConsole()) {
+            $this->publishes([
+                __DIR__.'/../config/clever-reach.php' => config_path('clever-reach.php'),
+            ], ['clever-reach', 'clever-reach-config']);
 
-    //Publishes routes
-    $this->publishes([
-      __DIR__ . '/../routes' => base_path('routes')
-    ], 'clever-reach-routes');
+            $this->publishesMigrations([
+                __DIR__.'/../database/migrations' => database_path('migrations'),
+            ], 'clever-reach-migrations');
 
-    //Publishes Actions
-    $this->publishes([
-      __DIR__ . '/Actions' => app_path('Actions')
-    ], 'clever-reach-actions');
+            $this->publishes([
+                __DIR__.'/../resources/views' => resource_path('views/vendor/clever-reach'),
+            ], ['clever-reach', 'clever-reach-views']);
+        }
+    }
 
-    //Publishes Livewire components
-    $this->publishes([
-      __DIR__ . '/../Livewire' => app_path('Http/Livewire/CleverReach')
-    ], 'clever-reach-livewire');
+    /**
+     * Register the service provider.
+     */
+    public function register(): void
+    {
+        $this->mergeConfigFrom(__DIR__.'/../config/clever-reach.php', 'clever-reach');
 
-    //Publishes Livewire views
-    $this->publishes([
-      __DIR__ . '/../resources/views/livewire' => resource_path('views/livewire/clever-reach')
-    ], 'clever-reach-views');
-  }
-
-  /**
-   * Register the service provider.
-   */
-  public function register()
-  {
-    //Register command
-    $this->commands([
-      Commands\PublishCommand::class,
-    ]);
-  }
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                Commands\PublishCommand::class,
+            ]);
+        }
+    }
 }
